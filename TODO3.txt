@@ -1,0 +1,168 @@
+	- Check for state repeats in a compilation unit ?
+
+LUA code generation
+
+	(X) - Solve the optional parameter in trigger redirections issue
+	(X) - Generate oldstyle triggers
+		(X) - animElem
+		(X) - oldStyleWithString
+		(X) - oldStyleSelectorString
+		(X) - hitDefAttr
+		(X) - oldStyleProj
+				- Projectiles wiht/without IDs issues
+		(X) - oldStyleWithId
+		(X) - timeMod
+
+	(X) - Solve the indent issue
+	(X) - Generate if's bodies (calls to controllers) (also with self / objectname)
+		(X) - Syntax is:
+				velSet	{	x=0,
+							y=0
+						}
+		(X) - Generate the rest of the arguments for each controller attribute
+		(X)	- Count and return the number of arguments in argList
+		(X)	- Check them for {} generation or not when applying to a controller argument
+	
+	(X) - Do not insert commas if there are no more arguments to the controller
+	(X) - Fix this issue: self.getHelper(130000).self.var[10]
+
+	(X) - Prevent var[x] = xxx appearing as an argument of a trigger call
+			(X)- Maybe getting from the tree the controller ref and syntax used?
+			(X)- Maybe getting the type (sysvar, sysfvar, ...) and the index and passing it to the controller as fvalue,value, ...?
+			(X)- Maybe reordering them to appear t the beginning?
+
+	(X) - Fix issues with 
+		(X) - value = {, "NT", "ST", "HT"},
+				=> value = {"", "NT, "ST", "HT"}
+				
+	(X) - Solve self:var[x] issue
+	
+	(X) - Create semantic actions to determine the correct name and source object of a given mugen name (case not waranteed)
+		(X) - Regularize trigger names and state initializer names (add self / objectname where necessary)
+			(X) - State initialization functions (add self.)
+			(X) - Trigger names
+			(X) - Controller names
+				(X) - Check proj with ID
+			(X) - Controller LHSs
+			(X) - Whitespace syntax selectors
+			-- IDs enclosed in double quotes will be case insensitive
+	(?) - In cns_reorderControllerElements() make sure there's at least one triggerX statement, otherwise raise an error
+	(X) - Replace dots '.' with underscores '_' in controller attribute names
+	(X) - Do something with the 'S' ID
+	(X) - Classify and order common controller attributes before trigger stmts
+		(X) - Set them before the call to the trigger
+		(X) - Work out the persistence feature for controllers
+			(X) - if persistence is specified 
+				(X) - 0: Activate only once				
+				(X) - >=1: Activate 1 of every 2 times ( time() % x == 0 )			
+		(X) - Work out the ignoreHitPause feature
+			(X) - ignoreHitPause = 0 will generate
+				(X) - if self.hitPauseTime == 0 then ...
+			(X) - ignoreHitPause = 1 will generate nothing
+		(X)- if self.canExecuteController(ignorehitpause, persistence) then
+		
+--TODO--(TODO) - Get rid of (if self.canExecuteController{ ... }) in syntax >=2 varSet, varAdd, parentVarSet, parentVarAdd
+		
+		>> - Call common function for common arguments like setControllerCommonArgs(args)
+	
+	(X) - Remove fifelse / sifelse / s*!!
+	
+	(X) - Solve the entityname issue when generating
+		(X) - function Entity:state_195()
+		
+	(X) - Account for NULL controllers
+	(X) - Do something with HITFLAG modifiers +/-
+	(X) - Implement assignment with :=
+	
+	(>) - Work out preevaluation and avoid "if constant then"
+			(X) - Add code to ^(unaryOp expr), number and ^(binaryOp expr expr)
+			  in the expr rule to make preeval work
+				- Account for divisions by zero!!
+			- Work out if's to suppress them if the expression preevaluates to a const
+			- Replace constant expressions with preevaluated values?
+
+	(X) - Create a cnsCodeblock class
+		(X) - std::string code
+		(X) - code type (STATE, INFO, ...)
+		(X) - std::string id (state number)
+		(X) - Overload the == operator (let it be "STATExxx")
+	
+	(X) - Create a class CompilationUnit
+		(X) - std::string sourcefile
+		(X) - map <std::string, cnsCodeblock *>
+		
+		- std::string sourcefilename
+		(X) - overload operator<<
+		(X) - std::string entityname
+		(X) - << operator
+			
+	(X) - In semantic actions...
+		(X) - beginCodeBlock(type)
+		(X) - finishCodeBlock()
+		(X) - addCodeBlockData(char *)
+		
+		(X) - luagenSemanticActions_init()
+		(X) - luagenSemanticActions_end()
+		(X) - luagenSemanticActions_getBlocks()
+	
+	- Get rid of canExecuteController for syntax >= 2 varset, varadd, parentvarset, parentvaradd
+	- Use the now native operators & and |
+	(?) - Insert \n's between 'or' in if conditions?
+	(?) - Remove if 1, if 0 and empty initialization blocks ?
+	
+	(X) - In main: Hold a list of compilation units
+	
+	(X) - Create class luaPostGenerator : public PostGenerator ?
+		(X) - Generates output files w/ filenames given the entity name and the input files of the compilation units
+		(?) - Group compilation units by intended destination
+		(X) - std::string entityname
+		- Allow for an output dir specification
+		(X) - create _main file
+			(X) - generate runtimeversion
+			(>>) - generate self.scriptList for reloading scripts
+				- generate entityName
+			(>>) - generate constructor deriving class from FightActor
+			(>>) - dofile() others
+		
+		(?) - ... (check for overriden states, ...)
+				- Just display info
+			
+		(?) - remove block (if overriden)
+			- The code block map does it automatically
+				- It also changes the order of states when dumping them to files
+				- Must give the cmd first and then the cnss in the order specified by the def
+		
+		- Make things appear in the right order (replace the std::map with a list?)
+		
+		(X) - generate other stuff
+				(X) - info blocks
+				(X) - button remap
+				(>>) - command blocks
+					(X) - Problem with the std::map that holds the codeblocks
+					- Generate the command string
+				- Defaults block
+		
+		(X) - other files?
+	
+	- Use a quick .ini file parser to parse the def file and get the cns names, entity names and other info
+	
+	(?) - Preprocessor?
+			- Comments table
+				- Line nb
+				- Comment string
+			- Add a \n at the end of the file
+
+
+=========== STATE NUMBERS ==============
+
+- Entry point: 5900
+- GetHit: 5000 ?
+
+=========== RUNTIME =============
+
+- Call common function for common arguments like setControllerCommonArgs(args)
+- floor integer arguments
+- math.huge checks
+- error("special") on state change
+- usage log?
+- call utils and game functions from fightActor

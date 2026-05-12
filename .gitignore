@@ -1,0 +1,131 @@
+# ---------------------------------------------------------------------------
+# Build directories
+# ---------------------------------------------------------------------------
+build/
+build-*/
+cmake-build-*/
+out/
+bin/
+obj/
+
+# ---------------------------------------------------------------------------
+# CMake
+# ---------------------------------------------------------------------------
+CMakeCache.txt
+CMakeFiles/
+CMakeScripts/
+cmake_install.cmake
+install_manifest.txt
+CTestTestfile.cmake
+Testing/
+compile_commands.json
+_deps/
+
+# ---------------------------------------------------------------------------
+# Ninja / Make
+# ---------------------------------------------------------------------------
+.ninja_deps
+.ninja_log
+build.ninja
+rules.ninja
+Makefile
+
+# ---------------------------------------------------------------------------
+# ANTLR3 generated artifacts
+# ---------------------------------------------------------------------------
+*.tokens
+generated/
+Grammars/*.tokens
+
+# Generated C sources/headers from grammars (regenerated at build time)
+cnsLexer.c
+cnsLexer.h
+cnsParser.c
+cnsParser.h
+cnscheck.c
+cnscheck.h
+defLexer.c
+defLexer.h
+defParser.c
+defParser.h
+luagen.c
+luagen.h
+
+# ---------------------------------------------------------------------------
+# Visual Studio (legacy 2008 project files were the original build)
+# ---------------------------------------------------------------------------
+*.rules
+*.ncb
+*.suo
+*.user
+*.sdf
+*.opensdf
+*.VC.db
+*.VC.opendb
+*.aps
+*.tlog
+*.idb
+*.pdb
+*.ilk
+*.exp
+*.obj
+*.iobj
+*.ipdb
+*.res
+*.tli
+*.tlh
+.vs/
+Debug/
+Release/
+x64/
+Win32/
+ipch/
+
+# ---------------------------------------------------------------------------
+# IDEs / editors
+# ---------------------------------------------------------------------------
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+*.bak
+.cache/
+.clangd/
+.ccls-cache/
+
+# ---------------------------------------------------------------------------
+# Compiled binaries / libraries
+# ---------------------------------------------------------------------------
+*.exe
+*.dll
+*.so
+*.so.*
+*.dylib
+*.a
+*.lib
+*.o
+*.lo
+
+# ---------------------------------------------------------------------------
+# OS junk
+# ---------------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---------------------------------------------------------------------------
+# Misc runtime output
+# ---------------------------------------------------------------------------
+output/
+output.txt
+*.log
+
+# ---------------------------------------------------------------------------
+# Vendored third-party deps — always tracked, never ignored by any rule above
+# ---------------------------------------------------------------------------
+!third_party/**
+
+# Re-ignore OS junk inside the vendored tree (the line above is broad).
+**/.DS_Store
+**/Thumbs.db

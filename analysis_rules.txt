@@ -1,0 +1,191 @@
+Analyze tree grammar:
+
+Types of arguments:
+	- Int
+	- Float
+	- ID
+	- Number (Int or Float)
+
+1.- TRIGGERCALLS (Regular syntax)
+	- if the name of the trigger exists then
+		- if the number of arguments match then
+			- if the type of arguments match then
+				- ok
+			- else
+				- if expected int and found float or the other way around then
+					- Log warning
+					- Coerce rewriting tree
+				- else
+					- Log error
+					- Abort
+				- end if
+			- end if
+		- else
+			- Log error: The trigger X does not take Y arguments
+		- end if
+	- else
+		- if the context is right (rhs expecting an ID) then
+			- Rewrite tree to remove triggercall
+		- else
+			- Log error: Trigger X not found
+		- end if
+	- end if
+	
+-(Old-style, whitespace and irregular syntax require special caring)
+
+2.- STATES
+	- Make sure they specify all the mandatory attributes
+	- Make sure the attributes RHS match
+
+3.- STATE CONTROLLERS
+	- For each state type
+		- Make sure they specify the required arguments
+		- Make sure the attributes RHS match
+		
+-=BETWEEN FILES=-
+	- Log a warning if a state is overriden
+
+().- Check that states we are jumping to exist
+
+
+
+
+TRANSLATION EXAMPLE:
+
+[STATEDEF 200]
+TYPE    = S
+MOVETYPE= A
+PHYSICS = S
+VELSET = 0,0
+CTRL = 0
+ANIM = 200
+SPRPRIORITY = 2
+FACEP2= IFELSE(PREVSTATENO>=440 && PREVSTATENO<=449,1,0)
+
+
+[STATE 0, REMOVEEXPLOD]
+TYPE = REMOVEEXPLOD
+TRIGGER1 = TIME =0
+ID =200
+
+[STATE 0, POSADD]
+TYPE = POSADD
+TRIGGER1 = ANIMELEM=2
+X =-15
+
+[STATE 0, POSADD]
+TYPE = POSADD
+TRIGGER1 = ANIMELEM=3
+X =-2
+
+[STATE 0, POSADD]
+TYPE = POSADD
+TRIGGER1 = ANIMELEM=6
+X =6
+
+[STATE 0, POSADD]
+TYPE = POSADD
+TRIGGER1 = ANIMELEM=7
+X =17
+
+[STATE 0, POSADD]
+TYPE = POSADD
+TRIGGER1 = ANIMELEM=8
+X =4
+
+[STATE 0, EXPLOD]
+TYPE = EXPLOD
+TRIGGER1 = ANIMELEM = 6
+ANIM =201
+ID =200
+POS=0,0
+POSTYPE = P1  ;P2,FRONT,BACK,LEFT,RIGHT
+SPRPRIORITY = 3
+REMOVEONGETHIT=1
+IGNOREHITPAUSE= 0
+BINDTIME =-1
+
+
+[STATE 0, PLAYSND]
+TYPE = PLAYSND
+TRIGGER1 = ANIMELEM =5
+VALUE = S13,12
+
+
+---- MAPS TO:
+
+function statedef_200()
+
+-- State assignments
+
+-- State 0, REMOVEEXPLOD
+if time() == 0 then
+	removeExplod(
+		{ 
+			id = 200 
+		}
+	)
+end
+
+-- State 1, POSADD
+if animElem() == 2 then
+	posAdd(
+		{
+			x = -15
+		}
+	)
+end if
+
+-- [...]
+
+-- State 0, EXPLOD
+if animElem() == 6 then
+	explod(
+		{
+			anim = 201,
+			id = 200,
+			pos = point{0,0},
+			posType = "P1",
+			sprPriority = 3,
+			removeOnGetHit = 1,
+			ignoreHitPause = 0,
+			bindTime = -1
+		}
+	)
+	
+end
+
+-- State 0, PLAYSND
+if animElem() == 5 then
+	playSnd(
+		{
+			value = {"S", 13, 12}
+		}
+	)
+end
+
+end
+
+
+
+
+
+
+TRANSLATION CONVENTIONS:
+
+
+SOME SPECIAL CASES
+------------------------------------
+	(Acerca del prefijo S (self) y F (common) en algunos atributos de los controllers, como VALUE de PLAYSND precediendo el grupo del elemento)
+	ejemplo:
+	
+	TYPE = PLAYSND
+	TRIGGER1 =ANIMELEM =12
+	VALUE = S13,1
+
+	
+	en el playsnd
+	si no pones nada lo toma del propio snd (lo mismo ke poner S)
+	pero en el hitdef en los parametros guardsound, hitsound etc si no pones nada lo toma del comun (lo mismo ke si pones F)
+	con el atributo sparkno del hitdef pasa lo mismo
+----------------------------------

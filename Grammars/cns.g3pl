@@ -1,0 +1,700 @@
+//////////////////////////////////////////
+//					//
+// LEXER + PARSER Grammar for M.U.G.E.N //
+// cns / cmd format			//
+//					//
+// 2011 - Miguel Angel Exposito		//
+// <radexx[at]gmail.com>		//
+//////////////////////////////////////////
+
+//------------------------------------
+// LEXER RULES
+//------------------------------------
+
+grammar cns;
+
+
+options {
+    output=AST;
+    k=2;
+    memoize=true;
+    ASTLabelType= CommonTree; // type of $stat.tree ref etc...
+    language=C;
+}
+
+
+// These are imaginary tokens that will serve as parent nodes
+// for grouping other tokens in our AST.
+tokens {
+	TRIGGERSTMT;
+	ALL;
+	INTERVAL;
+	TRIGGERCALL;
+	TRIGGERREDIR;
+	ASSIGNSTMT;
+	CNS;
+	INFOBLOCK;
+	STATECNTID;
+	CMDMODIFIERS;
+	CMDUNIT;
+}
+
+
+@header {
+}
+
+
+@members {
+#ifdef _JAVA
+	enum Type {TYPE_INT,
+		   TYPE_FLOAT,
+		   TYPE_BOTTOM,
+		   TYPE_SAME,
+		   TYPE_UNDEFINED
+		   };
+		   
+	
+	boolean isPositive(String in)
+	{
+		return java.lang.Float.parseFloat(in) >= 0.0;
+	}
+	
+	boolean checkArgumentsAndTypes()
+	{
+		return false;
+	}
+	
+	int getReturnType()
+	{
+		return 0;
+	}
+	
+	Type binaryOperationType(Type a, Type b)
+	{		
+		if(a == Type.TYPE_INT && b == Type.TYPE_INT)
+		{
+			return Type.TYPE_INT;
+		} else if(a == Type.TYPE_FLOAT || b == Type.TYPE_FLOAT)
+		{
+			return Type.TYPE_FLOAT;
+		}
+		return Type.TYPE_UNDEFINED;
+	}
+	
+	boolean requireFloat(Type in)
+	{
+		return (in == Type.TYPE_FLOAT);
+	}
+	
+	boolean requireInt(Type in)
+	{
+		return (in == Type.TYPE_INT);
+	}
+	
+	boolean checkAssignment(Type lhs, Type rhs)	// Used for :=, trigger calls and arguments of statecontrollers
+	{
+		if(lhs == Type.TYPE_INT && rhs == Type.TYPE_FLOAT)
+		{
+			// Coerce int to float
+			emitWarning("Assigning a float value where an int was expected. The float value will be rounded to the nearest int !!. To avoid this warning consider using the Ceil or Floor triggers.");
+			return true;
+		} else if(lhs == Type.TYPE_FLOAT && rhs == Type.TYPE_INT)
+		{
+			// Coerce float to int
+			return true;
+		} else if(lhs == rhs || rhs == Type.TYPE_UNDEFINED)	// Some triggers like IFELSE resolve the return type at run-time
+		{
+			// No coercion necessary
+			return true;
+		}
+		
+		return false;	// otherwise
+	}
+	
+	void emitWarning(String text)
+	{
+		int line = input.LT(1).getLine();
+		System.out.println("Warning at line " + line + ": " + text);
+	}
+	
+	public String getErrorMessage(RecognitionException e, String[] tokenNames)
+	{
+		List stack = getRuleInvocationStack(e, this.getClass().getName());
+		/* String msg = null;
+		if ( e instanceof NoViableAltException ) {
+			NoViableAltException nvae = (NoViableAltException)e;
+			msg = " no viable alt; token="+e.token+
+			" (decision="+nvae.decisionNumber+
+			" state "+nvae.stateNumber+")"+
+			" decision=<<"+nvae.grammarDecisionDescription+">>";
+		} else if(  e instanceof FailedPredicateException  ) {
+     			FailedPredicateException fpe = (FailedPredicateException)e;
+			msg = "failed predicate; token="+fpe.token+
+			" (rule="+fpe.ruleName+" predicate="+fpe.predicateText+")";
+		} else {
+			msg = super.getErrorMessage(e, tokenNames);
+		} */
+		String hdr = getErrorHeader(e);
+        	String msg = getErrorMessage(e, tokenNames);
+		return hdr + " " + msg;
+		//return "Error at " + e.line + ":" + charPositionInLine + ": " + msg;
+	}
+	
+	public String getTokenErrorDisplay(Token t)
+	{
+		return t.toString();
+	}
+#endif
+}
+
+OB	:	'[';
+CB	:	']';
+COMMA	:	',';
+TRIGGER	:	'TRIGGER';
+TRIGGERALL
+	:	'TRIGGERALL';
+OP	:	'(';
+CP	:	')';
+PLUS	:	'+';
+MINUS	:	'-';
+EQUAL	:	'=';
+MULT	:	'*';
+DIV	:	'/';
+MODULO	:	'%';
+EXP	:	'**';
+NOT	:	'!';
+LOGAND	:	'&&';
+LOGOR	:	'||';
+LOGXOR	:	'^^';
+BITNOT	:	'~';
+BITAND	:	'&';
+BITOR	:	'|';
+BITXOR	:	'^';
+ASSIGN	:	':=';
+NOTEQUAL 
+	:	'!=';
+LT	:	'<';
+GT	:	'>';
+LET	:	'<=';
+GET	:	'>=';
+DOT	:	'.';
+
+DOLLAR	:	'$';
+
+STATE	:	'STATE';
+STATEDEF:	'STATEDEF';
+
+// State controller parameters
+// TYPE
+PERSISTENT
+	:	'PERSISTENT';
+
+
+// Whitespace syntax triggers
+VEL	:	'VEL';
+POS	:	'POS';
+HITVEL	:	'HITVEL';
+P2BODYDIST
+	:	'P2BODYDIST';
+P2DIST	:	'P2DIST';
+PARENTDIST
+	:	'PARENTDIST';
+ROOTDIST:	'ROOTDIST';
+SCREENPOS
+	:	'SCREENPOS';
+	
+
+// Trigger followed by int syntax triggers
+PROJCONTACT
+	:	'PROJCONTACT';
+PROJGUARDED
+	:	'PROJGUARDED';	
+PROJHIT	:	'PROJHIT';
+
+// Old-style triggers
+ANIMELEM:	'ANIMELEM';
+AUTHORNAME
+	:	'AUTHORNAME';
+COMMAND	:	'COMMAND';
+CONSTSCALE
+	:	'CONST' ('240' | '480' | '720') 'P';
+CONST	:	'CONST';
+GETHITVAR
+	:	'GETHITVAR';
+HITDEFATTR
+	:	'HITDEFATTR';
+NAME	:	'NAME';
+PxNAME	:	'P' '1'..'4' 'NAME';
+STAGEVAR:	'STAGEVAR';
+TIMEMOD	:	'TIMEMOD';
+VAR	:	'VAR';		// They're also triggers!
+FVAR	:	'FVAR';		// They're also triggers!
+SYSVAR	:	'SYSVAR';	// They're also triggers!
+SYSFVAR	:	'SYSFVAR';	// They're also triggers!
+MOVETYPE:	'MOVETYPE';
+TYPE	:	'TYPE';
+
+STATETYPE
+	:	'STATETYPE';
+PHYSICS	:	'PHYSICS';
+
+
+// Other special names
+
+
+P2STATETYPE:	'P2STATETYPE';
+
+TEAMMODE:	'TEAMMODE';
+TIME	:	'TIME';
+REMAP	:	'REMAP';
+DEFAULTS:	'DEFAULTS';
+
+// Tokens that can go as lhs in assignments and mix letters and numbers
+FACEP2	:	'FACEP2';
+VALUE2	:	'VALUE2';
+
+FLAGx	:	'FLAG' ('2'|'3')?;
+
+PxRELATED
+	:	'P' '1'..'2' ('SPRPRIORITY' | 'FACING' | 'GETP2FACING' | 'STATENO' | 'GETP1STATE' | 'DEFMUL' | 'LIFE' | 'MOVETYPE')?;
+
+// Tokens that can go as rhs in assignments and mix letters and numbers
+/*CHANGEANIM2
+	:	'CHANGEANIM2';
+*/
+
+// Generic trigger names and others
+ID	:	LETTER+;
+IDSELECTOR
+	:	(LETTER | DOT)+;
+
+STRING_LITERAL: '"' (options { greedy = false; }:(NONCONTROL_CHAR)*) '"';
+
+fragment NONCONTROL_CHAR: LETTER | DIGIT | SYMBOL | SPACE;
+fragment LETTER: 	LOWER | UPPER | SPECIAL;
+fragment LOWER: 	'a'..'z';
+fragment UPPER: 	'A'..'Z';
+fragment DIGIT: 	'0'..'9';
+fragment SPACE: 	' ' | '\t';
+fragment SPECIAL
+	:		'_';
+
+// Note that SYMBOL omits the double-quote character,
+// digits, uppercase letters and lowercase letters.
+fragment SYMBOL: 	'!' | '#'..'/' | ':'..'@' | '['..'`' | '{'..'~';
+
+NEWLINE :		('\r'? '\n' { $channel = HIDDEN;})+;
+
+FLOAT   :		'0'..'9'* '.' '0'..'9'+;
+INTEGER : 		'0'..'9'+;
+	
+
+WHITESPACE:		(' ' | '\t')+ { $channel = HIDDEN; };
+
+//------------------------------------
+// PARSER RULES
+//----------1--------------------------
+COMMENT options { greedy = false; }: ';' ~('\r' | '\n')* NEWLINE {skip();} ;
+
+//SCNAME	:		COMMA (NONCONTROL_CHAR | WHITESPACE)* CB;
+
+
+
+cns	:	(state | infoBlock | cmdDefBlock | remapBlock | defaultsBlock)+ EOF;
+
+infoBlock:	OB name=idSel CB  infoStmt+ -> ^(INFOBLOCK $name infoStmt+)
+	;
+
+infoStmt:	(lhs0=idSel | lhs1=reservedKWAsLHS | lhs2=victoryLHS) EQUAL (rhs0=infoRHS | rhs1=STRING_LITERAL) -> ^(ASSIGNSTMT $lhs0? $lhs1? $lhs2? $rhs0? $rhs1?)
+		
+	;
+	
+victoryLHS
+	:	'VICTORY'^ INTEGER
+	;
+	
+	
+infoRHS	:	signedNumber (COMMA! signedNumber)*;
+
+
+state	:	OB! STATEDEF^ signedInteger CB! 
+		((stateAssignStmt)=>stateAssignStmt | assignStmt)*
+		stateCntBlock*
+	;
+
+
+attr_string
+	:	'S' | ID
+	;
+
+stateAssignStmt
+	:	TYPE^ EQUAL! attr_string  |
+		PHYSICS^ EQUAL! attr_string  |
+		MOVETYPE^ EQUAL! attr_string 
+	;
+
+testTriggers
+	:	triggerStmt+
+	;
+
+testControllers
+	:
+		stateCntStmts	
+	;
+
+stateCntBlock
+	:	OB! STATE^ stateCntNamePre CB! stateCntStmts
+	;
+
+stateCntNamePre		// Workaround for ANTLR3
+	:	stateCntName -> ^(STATECNTID stateCntName)
+	;
+
+stateCntName
+	:
+		(options { greedy = false; }:~(CB)+)
+	;
+stateCntStmts
+	:	(triggerStmt | assignStmt | scAssignStmt)+
+	;
+
+triggerStmt
+	:	TRIGGER i=INTEGER EQUAL e=exp  -> ^(TRIGGERSTMT $i $e)
+		| TRIGGERALL EQUAL e=exp  -> ^(TRIGGERSTMT ^(ALL) $e)
+	;
+
+scAssignStmt
+	:	PERSISTENT^ EQUAL! INTEGER  |
+		TYPE^ EQUAL! (ID | 'HELPER' | 'CHANGEANIM2') 	// Special types (have numbers or are keywords)
+	;
+	
+assignStmt
+	:	((lhs0=idSel | lhs1=reservedKWAsLHS) | lhs2=varReference ) EQUAL (rhs0=argValueList /* | rhs1=rhsSpecial*/)  -> ^(ASSIGNSTMT $lhs0? $lhs1? $lhs2? $rhs0? /*$rhs1?*/)
+		
+	;
+	
+	
+argValueList
+	:	('S'|'F')? (exp | STRING_LITERAL | cntArgKeywords)? (COMMA! (exp | STRING_LITERAL | cntArgKeywords))*
+	;
+	
+reservedKWAsLHS
+	:	POS | VEL | FACEP2 | VALUE2 | FLAGx | PxRELATED | NAME | STATETYPE | MOVETYPE | PHYSICS | TIME | 'PLAYER' | 'ADD' /*| 'HELPERTYPE'*/
+	;
+
+cntArgKeywords
+	:	trans_type | flag_name | postype | postype_string | wave_type | helpertype_string | anim_type | hit_type | attack_type
+	;
+ 
+trans_type: 'NONE' | 'ADD' | 'ADDALPHA' | 'ADD1' | 'SUB'
+		  ;
+		  
+flag_name: 'INTRO' | 'INVISIBLE' | 'ROUNDNOTOVER' | 'NOBARDISPLAY' | 'NOBG' | 'NOFG' | 'NOSTANDGUARD' | 'NOCROUCHGUARD' | 'NOAIRGUARD' |
+			'NOAUTOTURN' | 'NOJUGGLECHECK' | 'NOKOSND' | 'NOKOSLOW' | 'NOSHADOW' | 'GLOBALNOSHADOW' | 'NOMUSIC' | 'NOWALK' | 'TIMERFREEZE' |
+			'UNGUARDABLE'
+			;
+			
+postype:	'FOOT' | 'MID' | 'HEAD'
+			;
+			
+postype_string: 'P1' | 'P2' | 'FRONT' | 'BACK' | 'LEFT' | 'RIGHT'
+				;
+
+wave_type:	'SINE' | 'SQUARE' | 'SINESQUARE' | 'OFF'
+			;
+			
+helpertype_string: 'PLAYER' | 'NORMAL'
+			;
+anim_type:	'LIGHT' | 'MEDIUM' | 'HARD' | 'BACK' | 'UP' | 'DIAGUP'	
+			;
+
+hit_type:	'DODGE' | 'HIT' | 'MISS'
+			;
+
+attack_type: 'HIGH' | 'LOW' | 'TRIP'
+			;
+
+
+
+
+
+
+exp	returns [Type t]
+	:	conditionalORExp {$t = $conditionalORExp.t;}
+	;
+
+parExp	returns [Type t]
+	:	OP! exp CP! {$t = $exp.t;}
+	;
+	
+expList	:	exp? (moreExpList)=>moreExpList
+	;
+
+moreExpList
+	:	(COMMA! exp)*;
+
+// Expression types by ascending order of operator precedence
+
+conditionalORExp	returns [Type t] // a || b
+	:	e1=conditionalXORExp {$t = $e1.t;} ( LOGOR^ e2=conditionalXORExp {requireInt($e1.t)}? {requireInt($e2.t)}? {$t = Type.TYPE_INT;})*
+	;
+conditionalXORExp	returns [Type t] // a ^^ b
+	:	e1=conditionalANDExp {$t = $e1.t;} ( LOGXOR^ e2=conditionalANDExp {requireInt($e1.t)}? {requireInt($e2.t)}? {$t = Type.TYPE_INT;})*
+	;
+conditionalANDExp	returns [Type t] // a && b
+	:	e1=bitORExp {$t = $e1.t;} ( LOGAND^ e2=bitORExp {requireInt($e1.t)}? {requireInt($e2.t)}? {$t = Type.TYPE_INT;})*
+	;
+bitORExp	returns [Type t]
+	:		// a | b	
+		e1=bitXORExp {$t = $e1.t;} ( BITOR^ e2=bitXORExp {requireInt($e1.t)}? {requireInt($e2.t)}? {$t=Type.TYPE_INT;})*
+	;
+	
+bitXORExp	returns [Type t]	// a ^ b
+	:	e1=bitANDExp {$t = $e1.t;} ( BITXOR^ e2=bitANDExp {requireInt($e1.t)}? {requireInt($e2.t)}? {$t=Type.TYPE_INT;})*
+	;
+	
+bitANDExp	returns [Type t]	// a & b
+	:	e1=assignExp {$t = $e1.t;} ( BITAND^ e2=assignExp {requireInt($e1.t)}? {requireInt($e2.t)}? {$t=Type.TYPE_INT;})*
+	;
+	
+assignExp	returns [Type t]	// var(num) := b , fvar(num) := b
+	:	(varReference ASSIGN)=>varAssignment {$t=$varAssignment.t;} | equalityExp {$t = $equalityExp.t;}
+	;
+
+varAssignment 	returns [Type t]
+	:	v=varReference ASSIGN^ e1=equalityExp {checkAssignment($v.t, $e1.t)}?	// Forces that the types match
+		{$t = $v.t;}
+	;
+
+equalityOp
+	:	EQUAL | NOTEQUAL;
+	
+equalityExp	returns [Type t]	// a = b, a != b, a = [0,3]
+	:	
+		e1=relationalExp {$t = $e1.t;} (equalityOp^ ((interval)=>interval | relationalExp) {$t = Type.TYPE_INT;})*
+	;
+	
+relationalExp	returns [Type t]	// a > b. a >= b, a < b, a <= b
+	:	e1=addSubExp {$t = $e1.t;} (relationalOp^ addSubExp {$t = Type.TYPE_INT;})*	// It should be something like bool, but a bool is assumed to be an int whose value is 1 or 0
+	;
+		
+relationalOp	returns [Type t]
+	:	GT | GET | LT | LET
+	;
+
+numberCompOp	returns [Type t]
+	:	equalityOp | relationalOp
+	;
+	
+addSubOp	returns [Type t]
+	:	PLUS | MINUS
+	;
+addSubExp	returns [Type t]	// a + b, a - b
+	:	e1=multDivModExp {$t = $e1.t;} ( addSubOp^ e2=multDivModExp {$t = binaryOperationType($e1.t, $e2.t);})*
+	;
+	
+	
+multDivModExp	returns [Type t]	// a * b, a / b, a % b
+	:	e1=expExp {$t = $e1.t;} ( multDivModOp^ e2=expExp {$t = binaryOperationType($e1.t, $e2.t);})*
+	;
+	
+multDivModOp
+	:	MULT | DIV | MODULO
+	;
+expExp	returns [Type t]
+	:		// a ** b
+		e1=unaryExp {$t = $e1.t;} ( EXP^ e2=unaryExp {$t = binaryOperationType($e1.t, $e2.t);} )*
+	;
+		
+unaryExp returns [Type t]:		// !a, -a, ~a
+		NOT^ e1=unaryExp {requireInt($e1.t)}? {$t=$e1.t;} | MINUS^ e2=unaryExp {$t=$e2.t;}| BITNOT^ e3=unaryExp {requireInt($e1.t)}? {$t=$e3.t;} | primaryExp {$t = $primaryExp.t;}
+	;
+
+//catch[FailedPredicateException e] {
+//	reportError("Type mismatch");
+//}
+
+primaryExp returns [Type t]	// (a), Cos(a), 10, 10.3
+	:	parExp {$t = $parExp.t;} | 
+		triggerCall {$t = $triggerCall.t; } | 		// TODO: OR FLAGSTRING ??
+		triggerRedirection {$t = $triggerRedirection.t; } | 
+		number {$t = $number.t;} /*|
+		varReference {$t = $varReference.t;}*/;
+		
+number	returns [Type t]:	INTEGER {$t=Type.TYPE_INT;}| FLOAT {$t=Type.TYPE_FLOAT;};
+
+signedInteger
+	:	MINUS^? num=INTEGER
+	;
+
+triggerCall	returns [Type t]	// Cos(a)
+	:	(name=ID | name=CONSTSCALE | name=PxRELATED | name=TIME) (args=arguments)? {$t = Type.TYPE_INT; } /* TEMP ! */ -> ^(TRIGGERCALL $name $args?)
+	 	| wSpaceSyntax {$t = Type.TYPE_INT; } /* TEMP! */ 
+	 	| oldStyleTriggerCall {$t = Type.TYPE_INT; } /* TEMP ! */
+	 	| varReference {$t = Type.TYPE_INT; } /* TEMP ! */
+	;
+	
+wSpaceSyntax		// These triggers can be called like Vel X, HitVel Y, ....
+	:	name=wSpaceSyntaxList arg=ID -> ^(TRIGGERCALL $name $arg)
+	;
+
+wSpaceSyntaxList	// These triggers can be called like Vel X, HitVel Y, ....
+	:	VEL | POS | HITVEL | P2BODYDIST | P2DIST | PARENTDIST | ROOTDIST | SCREENPOS
+	;
+	
+arguments		// (exp, exp, exp)
+	:	OP! expList CP!
+	;	
+	
+interval:	// [0,3], (2,2), [2,6)...
+		(open=OP | open=OB) a=exp COMMA b=exp (close=CP | close=CB) -> ^(INTERVAL $open $a $b $close)
+	;
+			// var(num) / fvar(num)
+varReference returns [Type t]
+	:	(VAR^ {$t = Type.TYPE_INT;} | FVAR^ {$t = Type.TYPE_FLOAT;} | SYSVAR^ {$t = Type.TYPE_INT;} | SYSFVAR^ {$t = Type.TYPE_FLOAT;}) OP! n=INTEGER CP! {isPositive($n.text)}?
+	;
+
+
+
+triggerRedirection returns [Type t]
+	@init {
+	}:	target0=parameterRedirections COMMA trig0=triggerCall {$t = $trig0.t;} -> ^(TRIGGERREDIR $target0 $trig0)
+		| target1=noparameterRedirections COMMA trig1=triggerCall {$t = $trig1.t;} -> ^(TRIGGERREDIR $target1 $trig1)
+	;
+		
+noparameterRedirections
+	:	'PARENT' | 'ROOT' | 'PARTNER'	
+	;
+	
+parameterRedirections
+	:	('HELPER' | 'TARGET' | 'ENEMY' | 'ENEMYNEAR' | 'PLAYERID')^ (OP! exp CP!)?
+	;
+
+// Old-style triggers
+oldStyleTriggerCall
+	:	ANIMELEM args0=animElemSuffix 				-> ^(TRIGGERCALL ANIMELEM $args0)
+		| name1=oldStyleWithString args1=oldStyleStringSuffix 	-> ^(TRIGGERCALL $name1 $args1)
+		| name2=oldStyleSelectorString args2=selectorStringSuffix -> ^(TRIGGERCALL $name2 $args2)
+		| HITDEFATTR args3=hitDefAttrSuffix 			-> ^(TRIGGERCALL HITDEFATTR $args3)
+		| name4=oldStyleProj args4=oldStyleProjSuffix 		-> ^(TRIGGERCALL $name4 $args4)
+		| name6=oldStyleWithId args6=idSuffix			-> ^(TRIGGERCALL $name6 $args6)
+		| TIMEMOD args8=timemodSuffix				-> ^(TRIGGERCALL TIMEMOD $args8)
+	;
+	
+oldStyleWithId
+	:	TEAMMODE | MOVETYPE | STATETYPE | P2STATETYPE
+	;
+	
+oldStyleSelectorString
+	:	CONST | GETHITVAR
+	;
+
+oldStyleWithString
+	:	AUTHORNAME | COMMAND | NAME | PxNAME | STAGEVAR OP! idSel CP!
+	;
+
+oldStyleProj
+	:	PROJCONTACT | PROJGUARDED | PROJHIT
+	;
+oldStyleProjSuffix
+	:	(INTEGER)? EQUAL! INTEGER (COMMA! numberCompOp? INTEGER)?
+	;
+	
+animElemSuffix
+	:	EQUAL! number (COMMA! numberCompOp? signedInteger)?
+	;
+	
+hitDefAttrSuffix
+	:	equalityOp ('S'|ID) (COMMA! ID)+
+	;
+
+idSuffix
+	:	equalityOp ('S'|ID)	// Special case
+	;
+	
+selectorStringSuffix
+	:	OP! idSel CP!
+	;
+
+oldStyleStringSuffix
+	:	equalityOp STRING_LITERAL
+	;
+
+
+timemodSuffix
+	:
+		numberCompOp signedInteger COMMA! signedInteger
+	;
+	
+compWithNumberOrInterval	// unused
+	:	equalityOp interval | relationalOp number
+	;
+	
+idSel	:	ID | IDSELECTOR
+	;
+	
+signedNumber: MINUS^? number
+	;
+
+// Command definitions (.cmd files)
+cmdDefBlock
+	:	OB! COMMAND^ CB! cmdStmt+
+	;
+		
+cmdStmt	:	cmdNameStmt | cmdDefStmt | cmdTimeStmt | cmdBufferTimeStmt
+	;
+		
+cmdNameStmt
+	:	NAME^ EQUAL! STRING_LITERAL 
+	;
+	
+cmdDefStmt
+	:	COMMAND^ EQUAL! cmdString (COMMA! cmdString)* 
+	;
+		
+cmdTimeStmt
+	:	TIME^ EQUAL! INTEGER 
+	;
+		
+cmdString
+	:	cmdStringUnit (PLUS^ cmdStringUnit)*
+	;
+	
+cmdStringUnit
+	:
+		mods=cmdStringPrefix btns=cmdButton -> ^(CMDUNIT ^(CMDMODIFIERS $mods) $btns)
+		| cmdButton -> ^(CMDUNIT cmdButton)
+	;
+		
+cmdButton
+	:	('F' | 'S' | ID)+ 
+	;
+	
+cmdStringPrefix
+	:	(DIV | BITNOT | DOLLAR | PLUS | GT | INTEGER)+ 
+	;
+	
+cmdBufferTimeStmt
+	:	'BUFFER.TIME'^ EQUAL! INTEGER
+	;
+
+// Button remapping (.cmd files)
+remapBlock
+	:	OB! REMAP^ CB! remapStmt*
+	;
+	
+remapStmt
+	:	lhs=remapTarget EQUAL rhs=remapTarget? -> ^(ASSIGNSTMT $lhs $rhs?) 
+	;
+remapTarget
+	:	(ID | 'S')
+	;
+
+// Defaults block
+defaultsBlock
+	:	OB! DEFAULTS^ CB! defaultsStmt*
+	;
+	
+defaultsStmt
+	:	lhs=idSel EQUAL rhs=INTEGER -> ^(ASSIGNSTMT $lhs $rhs)
+	;

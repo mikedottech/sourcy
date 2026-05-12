@@ -1,0 +1,120 @@
+==== General Compiler info ====
+
+compile.exe krono.cns krono2.cns krono3.cns krono.cmd --output LUA --noopwrap
+
+output:
+	crono.lua
+	crono2.lua
+	crono3.lua
+	cronocmd.lua
+	cronomain.lua	-> require()s the other files
+	
+pipeline:
+	
+	(
+		FRONT-END (fixed)
+			- parser		(file -> AST)
+			- error check	(AST -> AST)
+			* (optimize?)	(AST -> AST)
+		
+		BACK-END (interchangeable)
+			- codegen		(AST -> codeblocks)
+	)+
+	
+	- codegen generates one codeblock per info/state block
+	- states are checked between files for duplicity
+	
+	(
+		CODE GENERATION
+			- Generate code files
+			- Generate master file
+			- Generate localization/balancing files?
+	)
+
+	( (optional)
+		ASSEMBLER
+			- Generates bytecode files (luac?)		
+	)?
+
+
+==== LUA Code translation (example) ====
+
+-- kronomain.lua --
+require("actor.lua") -- ?
+
+require("crono.lua")
+require("crono2.lua")
+require("crono3.lua")
+require("cronocmd.lua")
+
+function crono:onInit() -- constructor?
+	-- Initialize the actor information
+	info["key"] = value
+end
+
+-- crono.lua --
+
+function crono:state100()
+
+	-- State initialization
+	if time() == 0 then
+		setStateInfo({	type = "S",
+						movetype = "A",
+						physics = "S"
+					 })	
+	end
+
+	-- PlaySnd controller
+	if triggerall and triggerall ... then	
+		if (trigger1 and trigger1 ...) or
+			(trigger2 and trigger2 ...) or
+			... then
+			playSnd({	value = id("S",10),
+						volumeScale = 1.0
+					})
+		end		
+	end
+
+	-- ....
+
+end
+
+...
+
+================
+(Part of the runtime)
+-- mugenChar.lua --
+
+-- Superclass of crono
+
+-- On construction declare all of the internal vars
+
+-- Define the runtime hooks (triggers/controllers)
+
+function onTick()
+
+	-- Update logic
+	-- Call the appropriate state function
+	-- Detect loops
+	
+end
+
+function onRender()
+
+	-- Account for trail effects, palettes, etc...
+
+end
+
+
+function inputHandler() ?
+
+	-- Check for P1/P2 commands
+	-- Mugen Chars need to have an internal state machine
+
+end
+
+function gameUpdate() ? (when in a match)
+	-- Check for collision boxes on actors (even projectiles)
+	-- Update their collision/hit state
+	-- Tick them
+end
