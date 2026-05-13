@@ -166,26 +166,3 @@ end
 
 end
 
-
-
-
-
-
-TRANSLATION CONVENTIONS:
-
-
-SOME SPECIAL CASES
-------------------------------------
-	(Acerca del prefijo S (self) y F (common) en algunos atributos de los controllers, como VALUE de PLAYSND precediendo el grupo del elemento)
-	ejemplo:
-	
-	TYPE = PLAYSND
-	TRIGGER1 =ANIMELEM =12
-	VALUE = S13,1
-
-	
-	en el playsnd
-	si no pones nada lo toma del propio snd (lo mismo ke poner S)
-	pero en el hitdef en los parametros guardsound, hitsound etc si no pones nada lo toma del comun (lo mismo ke si pones F)
-	con el atributo sparkno del hitdef pasa lo mismo
-----------------------------------
