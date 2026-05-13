@@ -25,7 +25,7 @@ std::ostream& operator<<(std::ostream& out, CompilationUnit& x )
 	const CompilationUnit::CodeBlocks& cbks = x.getCodeBlocks();
 
 	for(const auto &i :cbks)
-		out << (i.second);
+		out << (*i.second);
 
 	return out;
 }
