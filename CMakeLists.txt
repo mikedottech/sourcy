@@ -236,6 +236,32 @@ set(GENERATED_SOURCES
     ${cppgen.g_OUTPUTS})
 
 # ----------------------------------------------------------------------------
+# Workaround: cap optimization on ANTLR3-generated tree parsers to -O1.
+#
+# ANTLR 3's C code generator has been frozen since 2014. Modern Clang/GCC at
+# -O2+ mis-optimize the generated tree-parser code, breaking AST walks with
+# bogus "UnwantedTokenException ... expected <UP>" errors that only appear in
+# Release builds. Pinning these specific files to -O1 sidesteps the issue.
+#
+# Repro: with cloudi.cns + cloudi.cmd, -O2 fails inside cnscheck.c. AddressSan
+# and UBSan don't catch it — the UB is in a class neither sanitizer covers.
+# Performance impact is negligible: parsing/walking CNS is not the hot path.
+#
+# Left at default opt level: cnsLexer/cnsParser/defLexer/defParser — those are
+# combined lexer+parser, not tree parsers, and don't exhibit the issue.
+#
+# MSVC: the workaround is GCC/Clang-only for now. The bug has not been observed
+# on MSVC; if it ever is, swap `-O1` for `/Od` or `/O1` here.
+# ----------------------------------------------------------------------------
+if(NOT MSVC)
+    set_source_files_properties(
+        ${cnscheck.g_OUTPUTS}
+        ${luagen.g_OUTPUTS}
+        ${cppgen.g_OUTPUTS}
+        PROPERTIES COMPILE_OPTIONS "-O1")
+endif()
+
+# ----------------------------------------------------------------------------
 # Hand-written sources
 # ----------------------------------------------------------------------------
 set(COMPILE_SOURCES
