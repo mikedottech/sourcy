@@ -12,6 +12,61 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 endif()
 
 # ----------------------------------------------------------------------------
+# Sanitizer build options
+#
+# Combine with any build type, e.g.:
+#     cmake -S . -B build-asan  -DCMAKE_BUILD_TYPE=Debug -DSOURCY_ENABLE_ASAN=ON
+#     cmake -S . -B build-ubsan -DCMAKE_BUILD_TYPE=Debug -DSOURCY_ENABLE_UBSAN=ON
+#     cmake -S . -B build-san   -DCMAKE_BUILD_TYPE=Debug -DSOURCY_ENABLE_ASAN=ON -DSOURCY_ENABLE_UBSAN=ON
+#
+# ASan and UBSan are compatible with each other and can be enabled together.
+# Both are mutually exclusive with TSan (not provided here).
+# ----------------------------------------------------------------------------
+option(SOURCY_ENABLE_ASAN  "Build with AddressSanitizer"   OFF)
+option(SOURCY_ENABLE_UBSAN "Build with UndefinedBehaviorSanitizer" OFF)
+
+set(_sourcy_sanitizers "")
+if(SOURCY_ENABLE_ASAN)
+    list(APPEND _sourcy_sanitizers address)
+endif()
+if(SOURCY_ENABLE_UBSAN)
+    list(APPEND _sourcy_sanitizers undefined)
+endif()
+
+if(_sourcy_sanitizers)
+    list(JOIN _sourcy_sanitizers "," _sourcy_san_list)
+    message(STATUS "Sanitizers enabled: ${_sourcy_san_list}")
+
+    if(MSVC)
+        # MSVC supports ASan natively since VS 2019 16.9; UBSan is not supported.
+        if(SOURCY_ENABLE_UBSAN)
+            message(WARNING "UBSan is not supported on MSVC; ignoring SOURCY_ENABLE_UBSAN.")
+        endif()
+        if(SOURCY_ENABLE_ASAN)
+            add_compile_options(/fsanitize=address /Zi)
+            # ASan on MSVC: avoid /INCREMENTAL and /RTC1; cmake's Debug default
+            # adds /RTC1, which conflicts. Strip it.
+            string(REGEX REPLACE "/RTC[^ ]*" "" CMAKE_C_FLAGS_DEBUG   "${CMAKE_C_FLAGS_DEBUG}")
+            string(REGEX REPLACE "/RTC[^ ]*" "" CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
+        endif()
+    else()
+        # Clang / GCC / AppleClang
+        add_compile_options(
+            -fsanitize=${_sourcy_san_list}
+            -fno-omit-frame-pointer
+            -fno-optimize-sibling-calls
+            -g)
+        add_link_options(-fsanitize=${_sourcy_san_list})
+
+        # UBSan: make every violation abort with a backtrace instead of just
+        # printing and continuing — much easier to spot in a noisy run.
+        if(SOURCY_ENABLE_UBSAN)
+            add_compile_options(-fno-sanitize-recover=undefined)
+        endif()
+    endif()
+endif()
+
+# ----------------------------------------------------------------------------
 # Paths
 # ----------------------------------------------------------------------------
 set(DEPS_DIR     "${CMAKE_CURRENT_SOURCE_DIR}/third_party/antlr3"
@@ -140,16 +195,22 @@ endfunction()
 #   cns.g       -> cns.tokens   (imports def.tokens)
 #   cnscheck.g  -> uses cns.tokens (tokenVocab)
 #   luagen.g    -> uses cns.tokens (tokenVocab)
-antlr3_generate(
-    GRAMMAR Grammars/def.g
-    TOKENS  def
-    OUTPUTS defLexer.c defLexer.h defParser.c defParser.h)
+
+#antlr3_generate(
+#    GRAMMAR Grammars/def.g
+#    TOKENS  def
+#    OUTPUTS defLexer.c defLexer.h defParser.c defParser.h)
 
 antlr3_generate(
     GRAMMAR Grammars/cns.g
     TOKENS  cns
     OUTPUTS cnsLexer.c cnsLexer.h cnsParser.c cnsParser.h
-    DEPENDS "${GEN_DIR}/def.tokens")
+)
+
+#antlr3_generate(
+#        GRAMMAR Grammars/cns.g3pl
+#        TOKENS cns
+#        OUTPUTS cnsLexer.c cnsLexer.h cnsParser.c cnsParser.h)
 
 antlr3_generate(
     GRAMMAR Grammars/cnscheck.g
@@ -165,6 +226,7 @@ antlr3_generate(
         GRAMMAR Grammars/cppgen.g
         OUTPUTS cppgen.c cppgen.h
         DEPENDS "${GEN_DIR}/cns.tokens")
+
 
 set(GENERATED_SOURCES
     ${def.g_OUTPUTS}
