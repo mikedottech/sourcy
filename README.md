@@ -1,5 +1,8 @@
 # Sourcy — CNS → Lua / C++ Compiler
 
+[![CI](https://github.com/mikedottech/sourcy/actions/workflows/cmake-multi-platform.yml/badge.svg)](https://github.com/mikedottech/sourcy/actions/workflows/cmake-multi-platform.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+
 > **Legacy code, circa 2012.** I wrote this as part of a [MUGEN](https://en.wikipedia.org/wiki/Mugen_(game_engine)) clone I was building back then.
 > The MUGEN engine drives characters with a scripting format called **CNS** (Character States) plus **CMD** (Command/Input) files. Sourcy parses those files and emits either **Lua** (for a scripted runtime) or **C++** (for a compiled runtime), selected at the command line.
 >
