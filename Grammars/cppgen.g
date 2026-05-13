@@ -1108,7 +1108,7 @@ scope
 		{
 			pANTLR3_STRING b = $scAssignStmt::buffer;
 			b->append8(b, "d.");
-			b->appendS(b, cppgenSemanticActions_getNameForControllerArg($stateCntBlock::pControllerUsage, $lhsH.text));			
+			b->append8(b, cppgenSemanticActions_getNameForControllerArg($stateCntBlock::pControllerUsage, $lhsH.text));
 			b->append8(b, " = \"");
 			b->appendS(b, $id.text);
 			if(mod)	b->appendS(b, $mod.text);			

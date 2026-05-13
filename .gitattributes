@@ -1,0 +1,63 @@
+# Force LF line endings on all text files, regardless of the platform the
+# clone happens on. Git normalizes to LF in the index, checks out as LF on disk.
+* text=auto eol=lf
+
+# ---------------------------------------------------------------------------
+# Explicit text (LF) — covers everything Sourcy actually contains as source.
+# ---------------------------------------------------------------------------
+*.c          text eol=lf
+*.cpp        text eol=lf
+*.h          text eol=lf
+*.hpp        text eol=lf
+*.inl        text eol=lf
+*.g          text eol=lf
+*.g3pl       text eol=lf
+*.tokens     text eol=lf
+*.lua        text eol=lf
+*.cns        text eol=lf
+*.cmd        text eol=lf
+*.txt        text eol=lf
+*.md         text eol=lf
+*.cmake      text eol=lf
+CMakeLists.txt text eol=lf
+*.gitignore  text eol=lf
+*.gitattributes text eol=lf
+LICENSE      text eol=lf
+
+# ---------------------------------------------------------------------------
+# Windows batch scripts — these GENUINELY need CRLF or older cmd.exe chokes.
+# Override the global rule for .bat / .cmd-style script files.
+# ---------------------------------------------------------------------------
+*.bat        text eol=crlf
+*.ps1        text eol=crlf
+
+# ---------------------------------------------------------------------------
+# Binary — never touch line endings, never diff as text.
+# ---------------------------------------------------------------------------
+*.jar        binary
+*.png        binary
+*.jpg        binary
+*.jpeg       binary
+*.gif        binary
+*.ico        binary
+*.zip        binary
+*.tar        binary
+*.gz         binary
+*.lib        binary
+*.dll        binary
+*.exe        binary
+*.so         binary
+*.dylib      binary
+*.a          binary
+*.o          binary
+*.obj        binary
+*.pdb        binary
+*.ncb        binary
+*.suo        binary
+*.sdf        binary
+
+# ---------------------------------------------------------------------------
+# GitHub Linguist: don't count vendored / generated code toward language stats.
+# ---------------------------------------------------------------------------
+third_party/**     linguist-vendored
+*.tokens           linguist-generated

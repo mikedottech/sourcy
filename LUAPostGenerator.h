@@ -15,8 +15,6 @@ class LUAPostGenerator :
 {
 public:
 	bool generateFiles(std::list<CompilationUnit> & lcu) override;
-private:
-	static std::string date_string();
 };
 
 #endif

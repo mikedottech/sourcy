@@ -38,3 +38,4 @@ void char_string_toUpperSelf(char *s)
 		s[i] = toupper(s[i]);
 	}
 }
+

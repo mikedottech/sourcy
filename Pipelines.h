@@ -10,5 +10,6 @@
 
 #include "CNSFrontEndPipeline.h"
 #include "LUABackEndPipeline.h"
+#include "CPPBackEndPipeline.h"
 
 #endif

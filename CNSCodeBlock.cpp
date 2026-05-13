@@ -19,6 +19,9 @@ CNSCodeBlock::CNSCodeBlock(const std::string &id, const std::string &code, CNSCo
 {
 }
 
+CNSCodeBlock::CNSCodeBlock(const std::string &id, const std::string &code, CNSCodeBlockType t, int32_t cnsStateId) : CodeBlock(id, code), m_cnsBlockType(t), m_cnsStateId(cnsStateId) {
+}
+
 CNSCodeBlock::CNSCodeBlock(const std::string &id, CNSCodeBlockType t) : CodeBlock(id), m_cnsBlockType(t)
 {
 }

@@ -19,10 +19,14 @@ public:
 	CNSCodeBlock(const std::string &id);
 	CNSCodeBlock(const std::string &id, CNSCodeBlockType t);
 	CNSCodeBlock(const std::string &id, const std::string &code, CNSCodeBlockType t);
+	CNSCodeBlock(const std::string &id, const std::string &code, CNSCodeBlockType t, int32_t cnsStateId);
+
 	void setBlockType(CNSCodeBlockType b) { m_cnsBlockType = b; }
 	CNSCodeBlockType getBlockType() const { return m_cnsBlockType; }
+	int32_t getCNSStateID() const { return m_cnsStateId; }
 private:
 	CNSCodeBlockType m_cnsBlockType;
+	int32_t m_cnsStateId;
 };
 
 #endif

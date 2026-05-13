@@ -20,6 +20,8 @@
 #include <algorithm>
 #include <string>
 
+#include "CPPPostGenerator.h"
+
 
 bool normalizeEntityName(std::string & en)
 {	
@@ -121,7 +123,7 @@ int main(int argc, char *argv[])
 	std::string outputLanguage = "LUA";
     while(args.read("--output",outputLanguage));
 
-	if(outputLanguage != "LUA")
+	if(outputLanguage != "LUA" && outputLanguage != "CPP")
 	{
 		std::cerr << "Error: The output format '" << outputLanguage << "' is not supported." << std::endl;
 		return 1;
@@ -200,6 +202,16 @@ int main(int argc, char *argv[])
 				// back-end
 				l->setInputAST(static_cast<pANTLR3_BASE_TREE>(pFrontEnd->getOutput()));
 			}
+			else if (outputLanguage == "CPP")
+			{
+				CPPBackEndPipeline *l = new CPPBackEndPipeline();
+				// Build the LUA back-end
+				pBackEnd = l;
+
+				// Set the output of the front-end as the input of the
+				// back-end
+				l->setInputAST(static_cast<pANTLR3_BASE_TREE>(pFrontEnd->getOutput()));
+			}
 
 			// Set backend data for code generation
 			pBackEnd->getPSAttributes().sourceFile	= filename;
@@ -237,6 +249,10 @@ int main(int argc, char *argv[])
 	if(outputLanguage == "LUA")
 	{
 		pPostGen = new LUAPostGenerator();
+	}
+	else if (outputLanguage == "CPP")
+	{
+		pPostGen = new CPPPostGenerator();
 	}
 
 	// Post generate files

@@ -15,20 +15,17 @@ CompilationUnit::CompilationUnit(const std::string sourceFilename) : m_sourceFil
 {
 }
 
-CodeBlock& CompilationUnit::addCodeBlock(const std::string id, CodeBlock&& cb)
+void CompilationUnit::addCodeBlock(const std::string id, std::shared_ptr<CodeBlock> cb)
 {
-	return (m_codeBlocks.emplace(id, cb).first)->second;
+	m_codeBlocks.insert({id, cb});
 }
 
 std::ostream& operator<<(std::ostream& out, CompilationUnit& x )
 {
-	const std::map<std::string, CodeBlock>& cbks = x.getCodeBlocks();
+	const CompilationUnit::CodeBlocks& cbks = x.getCodeBlocks();
 
-	std::map<std::string, CodeBlock>::const_iterator i;
+	for(const auto &i :cbks)
+		out << (i.second);
 
-	for(i = cbks.begin(); i != cbks.end(); ++i)
-	{
-		out << (i->second);
-	}
 	return out;
 }

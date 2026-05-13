@@ -520,7 +520,7 @@ attr_ok:
 	ANTLR3_BOOLEAN cns_beginStateController(void * controllerUsage)
 	{
 		pCurrentController	= (cnsControllerUsage_t *) controllerUsage;
-		curControllerIsnullptr = !strcmp(pCurrentController->pSignature->UCName, "nullptr");
+		curControllerIsnullptr = !strcmp(pCurrentController->pSignature->UCName, "NULL");
 		pCurrentAttribute	= nullptr;
 		checkMode			= CM_CONTROLLER;
 		clearUsedAttributes();

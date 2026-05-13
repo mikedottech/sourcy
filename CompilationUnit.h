@@ -10,20 +10,20 @@
 
 #include "CodeBlock.h"
 
-
 class CompilationUnit
 {
 public:
+	typedef std::map<std::string, std::shared_ptr<CodeBlock>> CodeBlocks;
 	CompilationUnit();
 	CompilationUnit(const std::string sourceFilename);
-	CodeBlock& addCodeBlock(const std::string id, CodeBlock&& cb);
+	void addCodeBlock(const std::string id, std::shared_ptr<CodeBlock> cb);
 	void setSourceFile(const std::string sf) { m_sourceFile = sf; }
 	std::string getSourceFile() { return m_sourceFile; }
 	void setEntityName(const std::string en) { m_entityName = en; }
 	std::string getEntityName() { return m_entityName; }
-	const std::map<std::string, CodeBlock> & getCodeBlocks() const {return m_codeBlocks;}
+	const CodeBlocks & getCodeBlocks() const {return m_codeBlocks;}
 private:
-	std::map<std::string, CodeBlock> m_codeBlocks;
+	CodeBlocks m_codeBlocks;
 	std::string m_sourceFile;
 	std::string m_entityName;
 };

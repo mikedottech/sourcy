@@ -161,11 +161,17 @@ antlr3_generate(
     OUTPUTS luagen.c luagen.h
     DEPENDS "${GEN_DIR}/cns.tokens")
 
+antlr3_generate(
+        GRAMMAR Grammars/cppgen.g
+        OUTPUTS cppgen.c cppgen.h
+        DEPENDS "${GEN_DIR}/cns.tokens")
+
 set(GENERATED_SOURCES
     ${def.g_OUTPUTS}
     ${cns.g_OUTPUTS}
     ${cnscheck.g_OUTPUTS}
-    ${luagen.g_OUTPUTS})
+    ${luagen.g_OUTPUTS}
+    ${cppgen.g_OUTPUTS})
 
 # ----------------------------------------------------------------------------
 # Hand-written sources
@@ -181,20 +187,25 @@ set(COMPILE_SOURCES
     CNSCheckStage.cpp
     CNSFileToAST.cpp
     LUABackEndPipeline.cpp
+    CPPBackEndPipeline.cpp
     CNSASTToLUAStage.cpp
+    CNSASTToCPPStage.cpp
     ApplicationUsage.cpp
     ArgumentParser.cpp
-        CnsControllerElement.cpp
+    CnsControllerElement.cpp
     Version.cpp
     CNSCheckSemanticActions.cpp
     CNSSemanticActions.cpp
     LUAGenSemanticActions.cpp
+    CPPGenSemanticActions.cpp
     CNSDataType.cpp
     CNSSemantics.cpp
     PostGenerator.cpp
     LUAPostGenerator.cpp
+    CPPPostGenerator.cpp
     antlr3customtokenstream.c
-        Helpers.c)
+    Helpers.c
+    HelpersCpp.cpp)
 
 add_executable(compile ${COMPILE_SOURCES} ${GENERATED_SOURCES})
 

@@ -48,7 +48,7 @@ ANTLR3_BOOLEAN cnsActions_triggerExist(const char * tName)
 			return ANTLR3_FALSE;
 		}
 
-		isControllernullptr = (!strcmp("nullptr", cu->pSignature->UCName));
+		isControllernullptr = (!strcmp("NULL", cu->pSignature->UCName));
 
 		pCurControllerUsage = cu;
 		return ANTLR3_TRUE;

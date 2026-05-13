@@ -1087,7 +1087,7 @@ scope
 					(mod=PLUS|mod=MINUS)?)
 		{
 			pANTLR3_STRING b = $scAssignStmt::buffer;
-			b->appendS(b, luagenSemanticActions_getNameForControllerArg($stateCntBlock::pControllerUsage, $lhsH.text));			
+			b->append8(b, luagenSemanticActions_getNameForControllerArg($stateCntBlock::pControllerUsage, $lhsH.text));
 			b->append8(b, " = \"");
 			b->appendS(b, $id.text);
 			if(mod)	b->appendS(b, $mod.text);			

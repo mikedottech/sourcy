@@ -9,18 +9,8 @@
 #include <fstream>
 #include <algorithm>
 #include <string>
-#include <ctime>
 #include "Version.h"
-
-std::string LUAPostGenerator::date_string()
-{
-	time_t rawtime;
-	std::time(&rawtime);
-	struct tm *tinfo = std::localtime(&rawtime);
-	char buffer[12];
-	strftime(buffer, 12, "%F", tinfo);
-	return std::string(buffer);
-}
+#include "HelpersCpp.h"
 
 bool LUAPostGenerator::generateFiles(std::list<CompilationUnit> & lcu)
 {
@@ -157,7 +147,13 @@ bool LUAPostGenerator::generateFiles(std::list<CompilationUnit> & lcu)
 		file << "-- Set the path of this file" << std::endl;
 		file << "require(\"debug\")" << std::endl;
 		file << "local dpath = debug.getinfo(1, \"S\").source" << std::endl;
-		file << entityName << ".m_path = dpath:match\"@(.+/).+%..+\"" << std::endl;
+		file << entityName << ".m_path = dpath:match\"@(.+/).+%..+\"" << std::endl << std::endl;
+
+		file << "-- Basic information" << std::endl;
+
+		file << entityName << "._type = \"" << entityName << "\"" << std::endl;
+		file << entityName << ".runtimeVersion = \"" << k_cns_rt_version << "\"" << std::endl;
+
 
 		file << std::endl;
 
@@ -181,10 +177,9 @@ bool LUAPostGenerator::generateFiles(std::list<CompilationUnit> & lcu)
 //		file << "\t-- Call the superclass constructor" << std::endl;
 //		file << "\tFightActor.init(self)" << std::endl;
 		file << std::endl << "\t-- Other attributes" << std::endl;
-		file << "\tself._type = \"" << entityName << "\"" << std::endl;
-		file << "\tself.runtimeVersion = \"" << k_cns_rt_version << "\"" << std::endl;
+		file << "\tself._class = " << entityName << std::endl;
 		file << "end" << std::endl;
-		
+
 		file << std::endl;
 		file << "-- First-time load of scripts" << std::endl;
 		file << "FightActor.reloadScripts(" << entityName << ")" << std::endl;
