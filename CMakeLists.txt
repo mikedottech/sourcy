@@ -5,7 +5,11 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-set(CMAKE_C_FLAGS "-Wno-switch -Wno-parentheses-equality")
+if(NOT MSVC)
+    # GCC/Clang-only warning suppressions. -Wno-parentheses-equality is Clang-specific
+    # but GCC silently ignores unknown -Wno-* flags, so it's safe to keep both.
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-switch -Wno-parentheses-equality")
+endif()
 
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     set(CMAKE_BUILD_TYPE Release CACHE STRING "" FORCE)

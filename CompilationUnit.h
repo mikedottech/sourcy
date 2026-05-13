@@ -7,6 +7,9 @@
 #define _COMPILATIONUNIT_H_
 
 #include <map>
+#include <memory>
+#include <ostream>
+#include <string>
 
 #include "CodeBlock.h"
 
