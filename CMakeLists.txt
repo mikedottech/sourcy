@@ -280,7 +280,7 @@ set(COMPILE_SOURCES
     CNSASTToCPPStage.cpp
     ApplicationUsage.cpp
     ArgumentParser.cpp
-    CnsControllerElement.cpp
+    CNSControllerElement.cpp
     Version.cpp
     CNSCheckSemanticActions.cpp
     CNSSemanticActions.cpp
