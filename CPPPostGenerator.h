@@ -4,6 +4,7 @@
 #include "PostGenerator.h"
 #include <map>
 #include "CNSCodeBlock.h"
+#include <list>
 
 class CPPPostGenerator :
 	public PostGenerator

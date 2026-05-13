@@ -7,6 +7,8 @@
 
 #include "CodeBlock.h"
 #include <iostream>
+#include <string>
+#include <ostream>
 
 CodeBlock::CodeBlock(const std::string & id) : m_id(id)
 {

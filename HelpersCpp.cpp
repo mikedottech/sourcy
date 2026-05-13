@@ -1,4 +1,6 @@
 #include "HelpersCpp.h"
+#include <string>
+#include <ctime>
 
 std::string date_string()
 {

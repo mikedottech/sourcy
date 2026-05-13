@@ -12,6 +12,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <string>
+#include <iostream>
+#include <ostream>
 
 ApplicationUsage::ApplicationUsage(const std::string& commandLineUsage):
     _commandLineUsage(commandLineUsage)

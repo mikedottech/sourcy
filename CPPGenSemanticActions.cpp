@@ -10,6 +10,8 @@ extern "C"
 {
 #	include "Helpers.h"
 #	include "CPPGenSemanticActions.h"
+#include <memory>
+#include <string>
 }
 
 static CompilationUnit *pcUnit = NULL;

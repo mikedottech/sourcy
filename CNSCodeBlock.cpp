@@ -6,6 +6,7 @@
 // Author: Miguel Angel Exposito Sanchez (radexx), 2012.
 
 #include "CNSCodeBlock.h"
+#include <string>
 
 CNSCodeBlock::CNSCodeBlock() : m_cnsBlockType(CBT_NONE)
 {

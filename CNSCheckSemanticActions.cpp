@@ -16,6 +16,7 @@
 extern "C"
 {
 #	include "Helpers.h"
+#include <utility>
 }
 cnsControllerUsage_t cns_stateDefProxyController =
 {

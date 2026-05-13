@@ -10,6 +10,7 @@
 
 #include "CodeBlock.h"
 #include "CNSCodeBlockType.h"
+#include <string>
 
 class CNSCodeBlock :
 	public CodeBlock

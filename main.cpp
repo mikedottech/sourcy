@@ -21,6 +21,7 @@
 #include <string>
 
 #include "CPPPostGenerator.h"
+#include <list>
 
 
 bool normalizeEntityName(std::string & en)

@@ -14,6 +14,8 @@
 
 #include <set>
 #include <iostream>
+#include <string>
+#include <ostream>
 
 
 bool ArgumentParser::isOption(const char* str)

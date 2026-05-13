@@ -12,6 +12,7 @@
 #include <antlr3.h>
 
 #include "PipelineStage.h"
+#include <string>
 
 class Pipeline
 {

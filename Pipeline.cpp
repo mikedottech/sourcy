@@ -7,6 +7,7 @@
 
 #include "Pipeline.h"
 #include <iostream>
+#include <list>
 
 Pipeline::Pipeline()
 {

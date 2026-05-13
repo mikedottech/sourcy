@@ -6,6 +6,9 @@
 // Author: Miguel Angel Exposito Sanchez (radexx), 2012.
 
 #include "CompilationUnit.h"
+#include <memory>
+#include <string>
+#include <ostream>
 
 CompilationUnit::CompilationUnit()
 {

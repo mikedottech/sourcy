@@ -9,6 +9,7 @@
 #define _LUAPOSTGENERATOR_H_
 
 #include "PostGenerator.h"
+#include <list>
 
 class LUAPostGenerator :
 	public PostGenerator

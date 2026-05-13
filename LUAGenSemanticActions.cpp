@@ -16,6 +16,8 @@ extern "C"
 {
 #	include "Helpers.h"
 #	include "LUAGenSemanticActions.h"
+#include <memory>
+#include <string>
 }
 
 // Mutable file-scope state used by ANTLR3 C-style semantic action callbacks.

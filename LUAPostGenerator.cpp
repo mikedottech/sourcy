@@ -11,6 +11,8 @@
 #include <string>
 #include "Version.h"
 #include "HelpersCpp.h"
+#include <list>
+#include <iostream>
 
 bool LUAPostGenerator::generateFiles(std::list<CompilationUnit> & lcu)
 {
