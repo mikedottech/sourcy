@@ -129,3 +129,6 @@ output.txt
 # Re-ignore OS junk inside the vendored tree (the line above is broad).
 **/.DS_Store
 **/Thumbs.db
+
+# script-generated temp files
+*.tmp

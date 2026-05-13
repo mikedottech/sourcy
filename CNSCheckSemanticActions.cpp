@@ -10,13 +10,13 @@
 #include "CNSControllerElement.h"
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <list>
 #include <assert.h>
 
 extern "C"
 {
 #	include "Helpers.h"
-#include <utility>
 }
 cnsControllerUsage_t cns_stateDefProxyController =
 {
