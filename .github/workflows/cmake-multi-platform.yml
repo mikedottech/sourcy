@@ -82,3 +82,35 @@ jobs:
       # Execute tests defined by the CMake configuration. Note that --build-config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
       # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
       run: ctest --build-config ${{ matrix.build_type }}
+
+    - name: Smoke test — compile sample CNS character
+      # End-to-end check: run the freshly built `compile` against the bundled
+      # tests/cns/* inputs in both Lua and C++ output modes. Catches runtime
+      # regressions that pure-build CI would miss (this is how we caught the
+      # ANTLR3-tree-parser optimization bug in Release builds).
+      working-directory: ${{ github.workspace }}
+      shell: bash
+      run: |
+        BUILD_DIR='${{ steps.strings.outputs.build-output-dir }}'
+
+        # Locate the binary — single-config (Make/Ninja) drops it at $BUILD_DIR,
+        # multi-config (MSBuild / VS) drops it at $BUILD_DIR/<Config>/.
+        if   [ -x "$BUILD_DIR/compile" ];                          then COMPILE="$BUILD_DIR/compile"
+        elif [ -x "$BUILD_DIR/${{ matrix.build_type }}/compile" ]; then COMPILE="$BUILD_DIR/${{ matrix.build_type }}/compile"
+        elif [ -x "$BUILD_DIR/${{ matrix.build_type }}/compile.exe" ]; then COMPILE="$BUILD_DIR/${{ matrix.build_type }}/compile.exe"
+        else
+          echo "::error::compile binary not found"
+          ls -la "$BUILD_DIR" "$BUILD_DIR/${{ matrix.build_type }}" 2>&1 || true
+          exit 1
+        fi
+        echo "Using binary: $COMPILE"
+
+        INPUTS=(./tests/cns/cloudi.cmd ./tests/cns/cloudi.cns ./tests/cns/cloudcommon.cns)
+
+        echo "::group::compile --output LUA"
+        "$COMPILE" "${INPUTS[@]}" --output LUA --entityname Cloudi
+        echo "::endgroup::"
+
+        echo "::group::compile --output CPP"
+        "$COMPILE" "${INPUTS[@]}" --output CPP --entityname Cloudi
+        echo "::endgroup::"
