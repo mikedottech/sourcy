@@ -54,6 +54,15 @@ jobs:
       run: |
         echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
 
+    - name: Set up Java
+      # The ANTLR 3.4 code generator (vendored under third_party/) is invoked at
+      # configure time, so the runner needs a JRE on PATH and JAVA_HOME set.
+      # GitHub-hosted runners do NOT ship a JDK on every OS image by default.
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
