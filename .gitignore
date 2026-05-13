@@ -132,3 +132,6 @@ output.txt
 
 # script-generated temp files
 *.tmp
+
+# Claude Code local config
+.claude/
