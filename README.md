@@ -17,14 +17,14 @@ compile  krono.cns krono2.cns krono3.cns krono.cmd  --output LUA   --entityname 
 compile  krono.cns krono2.cns krono3.cns krono.cmd  --output CPP   --entityname krono
 ```
 
-Given one or more `.cns` / `.cmd` files describing a MUGEN-style character, Sourcy emits a set of files in the target language. With `--output LUA` (the default), you get a per-file Lua module plus a master file that wires them together:
+Given one or more `.cns` / `.cmd` files describing a MUGEN-style character, Sourcy emits a set of files in the target language. With `--output LUA` (the default), you get a per-file Lua module plus a master file that wires them together (See [`tests/lua/Cloudi_master.lua`](tests/lua/Cloudi_master.lua) or [`tests/lua/Cloudi_master.cpp`](tests/lua/Cloudi_master.cpp)):
 
 ```
 crono.lua          ← state blocks from krono.cns
 crono2.lua         ← state blocks from krono2.cns
 crono3.lua         ← state blocks from krono3.cns
-cronocmd.lua       ← command definitions from krono.cmd
-cronomain.lua      ← entry point: require()s the other files
+crono_cmd.lua       ← command definitions from krono.cmd
+crono_master.lua      ← entry point: require()s the other files
 ```
 
 With `--output CPP`, the same conceptual structure is emitted as C++ — one source/header pair per input file plus a master entry point. The result is meant to be compiled into a runtime that doesn't embed a Lua VM, trading flexibility (no hot-reloading) for raw speed.
@@ -43,7 +43,7 @@ A worked example of the input → output translation lives in [`compilerinfo.txt
 | **A C/C++ compiler** | MSVC, Clang, or GCC. C99 + C++11 |
 | **Java (JRE/JDK)** | To run the ANTLR 3.4 code generator at build time |
 
-The ANTLR 3.4 jar and the libantlr3c C runtime source are vendored under [`third_party/antlr3/`](./third_party/), so you don't need to install ANTLR or its C runtime separately. On MSVC the build picks up the prebuilt `.lib`; on macOS / Linux / MinGW it compiles libantlr3c from source.
+The ANTLR 3.4 jar and the libantlr3c C runtime source are vendored under [`third_party/antlr3/`](./third_party/), so you don't need to install ANTLR or its C runtime separately.
 
 ---
 
@@ -230,8 +230,6 @@ void Cloudi::state_1013()
 }
 ```
 
-A "master" file (*_master.{.lua,.cpp}) is also generated gluing it all together, including but not limited to: the character's metadata, button remaps, a list of related files, ... See [`tests/lua/Cloudi_master.lua`](tests/lua/Cloudi_master.lua) or [`tests/lua/Cloudi_master.cpp`](tests/lua/Cloudi_master.cpp).    
-
 The runtime (not in this repo) provides the `FightActor` superclass, the per-frame `onTick` / `onRender` loop, input handling, collision/hit boxes, and the controller / trigger primitives that the generated code calls into. Two runtimes exist conceptually:
 
 - **Lua runtime** — loads the `*.lua` files via `require`, dispatches state functions per tick. Cheap to iterate on, supports hot reload.
@@ -289,6 +287,7 @@ Interval / range trigger expressions (e.g. `time = [0, 10]`).
 ![Interval AST](tests/intervaltest.png)
 
 A larger CNS corpus used during development is in [`tests/cns`](tests/cns).
+The corresponding output files for the above source CNS/CMD files can be found in [`tests/lua`](tests/lua), and  [`tests/cpp`](tests/cpp).
 
 ---
 
