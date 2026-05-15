@@ -60,22 +60,45 @@ options
 	}
 	
 #define BINARY_OP_ARITH_PREEVAL(PDST, OPTYPE, OPERATOR, LEFTPE, RIGHTPE) \
-	switch(OPTYPE)\
-	{\
-		case OP_INT_INT:\
-			PDST->data.intVal = LEFTPE.data.intVal OPERATOR RIGHTPE.data.intVal;\
-		break;\
-		case OP_FLOAT_FLOAT:\
-			PDST->data.floatVal = LEFTPE.data.floatVal OPERATOR RIGHTPE.data.floatVal;\
-		break;\
-		case OP_INT_FLOAT:\
-			PDST->data.floatVal = LEFTPE.data.intVal OPERATOR RIGHTPE.data.floatVal;\
-		break;\
-		case OP_FLOAT_INT:\
-			PDST->data.floatVal = LEFTPE.data.floatVal OPERATOR RIGHTPE.data.intVal;\
-		break;\
-	}\
-	PDST->valType = LEFTPE.valType == CDT_FLOAT || RIGHTPE.valType == CDT_FLOAT ? CDT_FLOAT : CDT_INT;\
+{\
+    const bool bIsDiv = !strcmp(#OPERATOR, "/");\
+    if(bIsDiv)\
+    {\
+        switch(OPTYPE)\
+        {\
+            case OP_INT_INT:\
+                PDST->data.floatVal = LEFTPE.data.intVal / (float)RIGHTPE.data.intVal;\
+            break;\
+            case OP_FLOAT_FLOAT:\
+                PDST->data.floatVal = LEFTPE.data.floatVal / RIGHTPE.data.floatVal;\
+            break;\
+            case OP_INT_FLOAT:\
+                PDST->data.floatVal = LEFTPE.data.intVal / RIGHTPE.data.floatVal;\
+            break;\
+            case OP_FLOAT_INT:\
+                PDST->data.floatVal = LEFTPE.data.floatVal / (float)RIGHTPE.data.intVal;\
+            break;\
+        }\
+        PDST->valType = CDT_FLOAT;\
+    } else {\
+        switch(OPTYPE)\
+        {\
+            case OP_INT_INT:\
+                PDST->data.intVal = LEFTPE.data.intVal OPERATOR RIGHTPE.data.intVal;\
+            break;\
+            case OP_FLOAT_FLOAT:\
+                PDST->data.floatVal = LEFTPE.data.floatVal OPERATOR RIGHTPE.data.floatVal;\
+            break;\
+            case OP_INT_FLOAT:\
+                PDST->data.floatVal = LEFTPE.data.intVal OPERATOR RIGHTPE.data.floatVal;\
+            break;\
+            case OP_FLOAT_INT:\
+                PDST->data.floatVal = LEFTPE.data.floatVal OPERATOR RIGHTPE.data.intVal;\
+            break;\
+        }\
+        PDST->valType = (LEFTPE.valType == CDT_FLOAT || RIGHTPE.valType == CDT_FLOAT ? CDT_FLOAT : CDT_INT);\
+    }\
+}\
 
 #define BINARY_OP_LOGIC_PREEVAL(PDST, OPTYPE, OPERATOR, LEFTPE, RIGHTPE) \
 	switch(OPTYPE)\
